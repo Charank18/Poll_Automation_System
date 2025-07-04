@@ -1,71 +1,172 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { useAuthStore } from "./store/auth-store";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+// // Import the functions you need from the SDKs you need
+// import { initializeApp } from "firebase/app";
+// import { getAnalytics } from "firebase/analytics";
+// import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+// import { useAuthStore } from "./store/auth-store";
+// // TODO: Add SDKs for Firebase products that you want to use
+// // https://firebase.google.com/docs/web/setup#available-libraries
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// // Your web app's Firebase configuration
+// // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// // const firebaseConfig = {
+// //   apiKey: "AIzaSyBF36YXhR791AdLHx5_A2QYd51bBFiHV1E",
+// //   authDomain: "vibe-5b35a.firebaseapp.com",
+// //   projectId: "vibe-5b35a",
+// //   storageBucket: "vibe-5b35a.firebasestorage.app",
+// //   messagingSenderId: "239934307367",
+// //   appId: "1:239934307367:web:8a66deaf3eba7db9856202",
+// //   measurementId: "G-MWJ5X88RNZ"
+// // };
+// const firebaseConfig = {
+//   apiKey: "AIzaSyD7tFzsZRTginnVsWtmfMQ2_PwUGE0-n_Q",
+//   authDomain: "poll-automation-8c374.firebaseapp.com",
+//   projectId: "poll-automation-8c374",
+//   storageBucket: "poll-automation-8c374.firebasestorage.app",
+//   messagingSenderId: "14130846018",
+//   appId: "1:14130846018:web:26b1fe363584dd4d7690db",
+//   measurementId: ""
+// };
+
+// // Initialize Firebase
+// const app = initializeApp(firebaseConfig);
+// export const auth = getAuth(app);
+// export const provider = new GoogleAuthProvider();
+
+// // Firebase authentication functions
+// export const loginWithGoogle = async () => {
+//   const result = await signInWithPopup(auth, provider);
+  
+//   // Get ID token for backend authentication
+//   const idToken = await result.user.getIdToken();
+  
+//   // Store the token
+//   useAuthStore.getState().setToken(idToken);
+  
+//   return result;
+// };
+
+// export const loginWithEmail = async (email: string, password: string) => {
+//   const result = await signInWithEmailAndPassword(auth, email, password);
+  
+//   // Get ID token for backend authentication
+//   const idToken = await result.user.getIdToken();
+  
+//   // Store the token
+//   useAuthStore.getState().setToken(idToken);
+  
+//   return result;
+// };
+
+// // Add a function to create a user with email and password
+// export const createUserWithEmail = async (email: string, password: string, displayName?: string) => {
+//   const auth = getAuth();
+//   const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+  
+//   // Update user profile if display name is provided
+//   if (displayName && userCredential.user) {
+//     await updateProfile(userCredential.user, {
+//       displayName
+//     });
+//   }
+  
+//   return userCredential;
+// };
+
+// export const logout = () => {
+//   signOut(auth);
+//   useAuthStore.getState().clearUser();
+// };
+
+// export const analytics = getAnalytics(app);
+
+
+//my implementaion
+
+import { initializeApp } from "firebase/app";
+import { 
+  getAuth, 
+  GoogleAuthProvider, 
+  signInWithPopup, 
+  signInWithEmailAndPassword, 
+  signOut,
+  createUserWithEmailAndPassword,
+  updateProfile,
+  onAuthStateChanged,
+  User
+} from "firebase/auth";
+import { useAuthStore } from "./store/auth-store";
+
 const firebaseConfig = {
-  apiKey: "AIzaSyBF36YXhR791AdLHx5_A2QYd51bBFiHV1E",
-  authDomain: "vibe-5b35a.firebaseapp.com",
-  projectId: "vibe-5b35a",
-  storageBucket: "vibe-5b35a.firebasestorage.app",
-  messagingSenderId: "239934307367",
-  appId: "1:239934307367:web:8a66deaf3eba7db9856202",
-  measurementId: "G-MWJ5X88RNZ"
+  apiKey: "AIzaSyD7tFzsZRTginnVsWtmfMQ2_PwUGE0-n_Q",
+  authDomain: "poll-automation-8c374.firebaseapp.com",
+  projectId: "poll-automation-8c374",
+  storageBucket: "poll-automation-8c374.firebasestorage.app",
+  messagingSenderId: "14130846018",
+  appId: "1:14130846018:web:26b1fe363584dd4d7690db",
+  measurementId: ""
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const provider = new GoogleAuthProvider();
 
-// Firebase authentication functions
+// Initialize auth state listener
+export const initAuth = (callback: (user: User | null) => void) => {
+  return onAuthStateChanged(auth, callback);
+};
+
 export const loginWithGoogle = async () => {
-  const result = await signInWithPopup(auth, provider);
-  
-  // Get ID token for backend authentication
-  const idToken = await result.user.getIdToken();
-  
-  // Store the token
-  useAuthStore.getState().setToken(idToken);
-  
-  return result;
+  try {
+    const result = await signInWithPopup(auth, provider);
+    const idToken = await result.user.getIdToken();
+    useAuthStore.getState().setToken(idToken);
+    return result;
+  } catch (error) {
+    console.error("Google login error:", error);
+    throw error;
+  }
 };
 
 export const loginWithEmail = async (email: string, password: string) => {
-  const result = await signInWithEmailAndPassword(auth, email, password);
-  
-  // Get ID token for backend authentication
-  const idToken = await result.user.getIdToken();
-  
-  // Store the token
-  useAuthStore.getState().setToken(idToken);
-  
-  return result;
-};
-
-// Add a function to create a user with email and password
-export const createUserWithEmail = async (email: string, password: string, displayName?: string) => {
-  const auth = getAuth();
-  const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-  
-  // Update user profile if display name is provided
-  if (displayName && userCredential.user) {
-    await updateProfile(userCredential.user, {
-      displayName
-    });
+  try {
+    const result = await signInWithEmailAndPassword(auth, email, password);
+    const idToken = await result.user.getIdToken();
+    useAuthStore.getState().setToken(idToken);
+    return result;
+  } catch (error) {
+    console.error("Email login error:", error);
+    throw error;
   }
-  
-  return userCredential;
 };
 
-export const logout = () => {
-  signOut(auth);
-  useAuthStore.getState().clearUser();
+export const createUserWithEmail = async (
+  email: string, 
+  password: string, 
+  displayName?: string
+) => {
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    
+    if (displayName) {
+      await updateProfile(userCredential.user, { displayName });
+    }
+    
+    const idToken = await userCredential.user.getIdToken();
+    useAuthStore.getState().setToken(idToken);
+    
+    return userCredential;
+  } catch (error) {
+    console.error("Signup error:", error);
+    throw error;
+  }
 };
 
-export const analytics = getAnalytics(app);
+export const logout = async () => {
+  try {
+    await signOut(auth);
+    useAuthStore.getState().clearUser();
+  } catch (error) {
+    console.error("Logout error:", error);
+    throw error;
+  }
+};
